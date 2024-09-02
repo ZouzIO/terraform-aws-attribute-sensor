@@ -1,0 +1,4 @@
+examples/local
+**.tfstate**
+**.lock.**
+.terraform

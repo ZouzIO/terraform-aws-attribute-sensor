@@ -1,0 +1,8 @@
+formatter: "markdown table"
+output:
+  file: README.md
+  mode: inject
+sort:
+  enabled: true
+  by: required
+version: ">= 0.13.0, < 1.0.0"

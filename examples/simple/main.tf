@@ -1,8 +1,8 @@
 resource "random_uuid" "external_id" {}
 
 module "attribute-sensor" {
-  # TODO: Registry URL
-  source = "../../modules/terraform-aws-attribute-sensor"
+  source  = "ZouzIO/attribute-sensor/aws"
+  version = "~> 1"
 
   organization_id = var.organization_id
   deployment_id   = var.deployment_id

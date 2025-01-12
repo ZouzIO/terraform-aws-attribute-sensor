@@ -40,3 +40,9 @@ variable "configure_ecs_cost_allocation_tags" {
   description = "(*Optional*) Whether to configure the ECS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API."
   default     = false
 }
+
+variable "logs_export_buckets" {
+  type        = list(string)
+  default     = []
+  description = "(*Optional*) The list of S3 buckets to grant access to the Loader IAM Role for ingesting logs."
+}

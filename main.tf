@@ -183,12 +183,15 @@ resource "aws_iam_role" "this" {
             "neptune-db:Describe*",
             "redshift:List*",
             "redshift:Describe*",
+            "kafka:Get*",
             "kafka:List*",
             "kafka:Describe*",
             "es:Describe*",
             "es:List*",
             "aoss:List*",
-            "osis:List*"
+            "osis:List*",
+            "bedrock:Get*",
+            "bedrock:List*"
           ]
           Resource = "*"
         },
@@ -196,6 +199,8 @@ resource "aws_iam_role" "this" {
           Sid    = "CostRecommendationViewer"
           Effect = "Allow"
           Action = [
+            "ce:Get*",
+            "ce:List*",
             "ce:ListCostAllocationTags",
             "ce:UpdateCostAllocationTagsStatus",
             "ce:GetReservationCoverage",

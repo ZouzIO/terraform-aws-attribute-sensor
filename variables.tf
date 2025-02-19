@@ -3,14 +3,19 @@ variable "organization_id" {
   description = "(**Required**) The Organization ID provided by Attribute."
 }
 
-variable "deployment_id" {
+variable "account_name" {
   type        = string
-  description = "(**Required**) The Deployment ID provided by Attribute."
+  description = "(**Required**) The AWS Account name."
 }
 
-variable "deployment_name" {
+variable "account_type" {
   type        = string
-  description = "(**Required**) The Deployment Name provided by Attribute."
+  description = "(**Required**) The AWS Account type. Available options are: 'management' or 'sub'."
+
+  validation {
+    condition     = contains(["management", "sub"], var.account_type)
+    error_message = "Invalid account type. Must be 'management' or 'sub'."
+  }
 }
 
 variable "external_id" {
@@ -18,6 +23,7 @@ variable "external_id" {
   sensitive   = true
   description = "(**Required**) The External ID used to assume the Loader IAM Role. In case of manual registration, this value must be provided to Attribute."
 }
+
 
 variable "registration_method" {
   type        = string

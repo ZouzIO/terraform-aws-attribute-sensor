@@ -9,3 +9,8 @@ repos:
     hooks:
       - id: terraform-docs-go
         args: ["./examples/simple"]
+  - repo: https://github.com/terraform-docs/terraform-docs
+    rev: "v0.18.0"
+    hooks:
+      - id: terraform-docs-go
+        args: ["./examples/multiple-accounts"]

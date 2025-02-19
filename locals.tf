@@ -8,8 +8,10 @@ locals {
     "aws:ecs:clusterName",
     "aws:ecs:serviceName",
   ]
+
   s3_prefix = "attributeexport"
 
+  export_name = "AttributeCurExport"
 
   logs_export_buckets = flatten([
     for bucket in var.logs_export_buckets : [
@@ -58,18 +60,6 @@ locals {
       Effect   = "Allow"
       Action   = "cloudtrail:LookupEvents"
       Resource = "*"
-    },
-    {
-      Sid    = "CURReader"
-      Effect = "Allow"
-      Action = [
-        "s3:GetObject",
-        "s3:ListBucket"
-      ]
-      Resource = [
-        aws_s3_bucket.this.arn,
-        "${aws_s3_bucket.this.arn}/${local.s3_prefix}/*"
-      ]
     },
     {
       Sid    = "S3Explorer"
@@ -164,5 +154,20 @@ locals {
       ]
       Resource = local.logs_export_buckets
     }
+  ] : []
+
+  cur_reader = var.account_type == "management" ? [
+    {
+      Sid    = "CURReader"
+      Effect = "Allow"
+      Action = [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ]
+      Resource = [
+        aws_s3_bucket.this[0].arn,
+        "${aws_s3_bucket.this[0].arn}/${local.s3_prefix}/*"
+      ]
+    },
   ] : []
 }

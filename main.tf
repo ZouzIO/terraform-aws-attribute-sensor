@@ -1,9 +1,13 @@
 resource "aws_s3_bucket" "this" {
+  count = var.account_type == "management" ? 1 : 0
+
   bucket = "attribute-cur-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
 }
 
 resource "aws_s3_bucket_ownership_controls" "this" {
-  bucket = aws_s3_bucket.this.id
+  count = var.account_type == "management" ? 1 : 0
+
+  bucket = aws_s3_bucket.this[0].id
 
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -18,14 +22,18 @@ resource "aws_s3_bucket_ownership_controls" "this" {
 }
 
 resource "aws_s3_bucket_acl" "this" {
-  depends_on = [aws_s3_bucket_ownership_controls.this]
+  count = var.account_type == "management" ? 1 : 0
 
-  bucket = aws_s3_bucket.this.id
+  depends_on = [aws_s3_bucket_ownership_controls.this[0]]
+
+  bucket = aws_s3_bucket.this[0].id
   acl    = "private"
 }
 
 resource "aws_s3_bucket_policy" "this" {
-  bucket = aws_s3_bucket.this.id
+  count = var.account_type == "management" ? 1 : 0
+
+  bucket = aws_s3_bucket.this[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -45,8 +53,8 @@ resource "aws_s3_bucket_policy" "this" {
           "s3:GetBucketPolicy"
         ]
         Resource = [
-          aws_s3_bucket.this.arn,
-          "${aws_s3_bucket.this.arn}/*",
+          aws_s3_bucket.this[0].arn,
+          "${aws_s3_bucket.this[0].arn}/*",
         ]
         Condition = {
           StringLike = {
@@ -64,7 +72,7 @@ resource "aws_s3_bucket_policy" "this" {
 }
 
 resource "aws_iam_role" "this" {
-  name = "AttributeLoaderV-${data.aws_region.current.name}"
+  name = "AttributeLoaderV-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -90,6 +98,7 @@ resource "aws_iam_role" "this" {
       Version = "2012-10-17"
       Statement = concat(
         local.base_statements,
+        local.cur_reader,
         local.exported_logs_reader
       )
     })
@@ -97,24 +106,25 @@ resource "aws_iam_role" "this" {
 }
 
 resource "aws_ce_cost_allocation_tag" "eks" {
-  for_each = var.configure_eks_cost_allocation_tags ? toset(local.eks_cost_allocation_tags) : []
+  for_each = (var.configure_eks_cost_allocation_tags && var.account_type == "management") ? toset(local.eks_cost_allocation_tags) : []
 
   tag_key = each.key
   status  = "Active"
 }
 
 resource "aws_ce_cost_allocation_tag" "ecs" {
-  for_each = var.configure_ecs_cost_allocation_tags ? toset(local.ecs_cost_allocation_tags) : []
+  for_each = (var.configure_eks_cost_allocation_tags && var.account_type == "management") ? toset(local.ecs_cost_allocation_tags) : []
 
   tag_key = each.key
   status  = "Active"
 }
 
 resource "aws_bcmdataexports_export" "this" {
-  count = var.registration_method == "manual" ? 1 : 0
+  count = var.account_type == "management" ? 1 : 0
+
   export {
-    name        = "AttributeCurExport"
-    description = "AttributeCurExport"
+    name        = local.export_name
+    description = local.export_name
     data_query {
       query_statement = file("${path.module}/files/bcm_cur_query.sql")
 
@@ -129,9 +139,9 @@ resource "aws_bcmdataexports_export" "this" {
     }
     destination_configurations {
       s3_destination {
-        s3_bucket = aws_s3_bucket.this.bucket
+        s3_bucket = aws_s3_bucket.this[0].bucket
         s3_prefix = local.s3_prefix
-        s3_region = aws_s3_bucket.this.region
+        s3_region = aws_s3_bucket.this[0].region
         s3_output_configurations {
           overwrite   = "OVERWRITE_REPORT"
           format      = "PARQUET"

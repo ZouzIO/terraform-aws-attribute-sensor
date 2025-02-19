@@ -6,7 +6,7 @@ The module supports two account types: `management` and `sub`. You can use a sin
 The following resources are created in the management account:
 - S3 bucket and ACLs for the CUR 2.0 reports
 - IAM role for the Loader
-- Data Export resource
+- Billing Data Export resource
 - CloudFormation stack for the Attribute Sensor registration ( optional )
 - ECS and EKS cost allocation tags ( optional )
 ### Sub
@@ -22,6 +22,10 @@ The module will create a CloudFormation stack to register the Attribute Sensor a
 The Attribute Sensor must be registered manually. Also, in that case, the `external_id` value must be provided to Attribute to complete the registration process.
 ## Cost Allocation Tags
 The module can configure the ECS and EKS cost allocation tags. To control this feature, the `configure_ecs_cost_allocation_tags` and `configure_eks_cost_allocation_tags` inputs can be adjusted. The configuration requires access to the AWS Cost Explorer API.
+
+## Upgrading
+### v1 -> v2
+* `ZouzCurExport` must be deleted manually after the upgrade as it's managed by the module now.
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -46,7 +50,7 @@ No modules.
 | [aws_bcmdataexports_export.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/bcmdataexports_export) | resource |
 | [aws_ce_cost_allocation_tag.ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ce_cost_allocation_tag) | resource |
 | [aws_ce_cost_allocation_tag.eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ce_cost_allocation_tag) | resource |
-| [aws_cloudformation_stack.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudformation_stack) | resource |
+| [aws_cloudformation_stack.registration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudformation_stack) | resource |
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_acl.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |

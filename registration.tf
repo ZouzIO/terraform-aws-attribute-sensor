@@ -1,4 +1,4 @@
-resource "aws_cloudformation_stack" "this" {
+resource "aws_cloudformation_stack" "registration" {
   count = var.registration_method == "cloudformation" ? 1 : 0
 
   name = "AttributeRegistration"

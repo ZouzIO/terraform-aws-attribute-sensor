@@ -113,7 +113,7 @@ resource "aws_ce_cost_allocation_tag" "eks" {
 }
 
 resource "aws_ce_cost_allocation_tag" "ecs" {
-  for_each = (var.configure_eks_cost_allocation_tags && var.account_type == "management") ? toset(local.ecs_cost_allocation_tags) : []
+  for_each = (var.configure_ecs_cost_allocation_tags && var.account_type == "management") ? toset(local.ecs_cost_allocation_tags) : []
 
   tag_key = each.key
   status  = "Active"

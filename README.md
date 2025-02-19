@@ -1,13 +1,31 @@
 # terraform-aws-attribute-sensor
 The module provisions all required infrastracture resources for the Attribute Sensor to operate. Please, refer to the [Input](#inputs) section for the configuration options.
+## Account types
+The module supports two account types: `management` and `sub`. You can use a single `manamgement` account and multiple `sub` accounts in the same organization.
+### Management
+The following resources are created in the management account:
+- S3 bucket and ACLs for the CUR 2.0 reports
+- IAM role for the Loader
+- Billing Data Export resource
+- CloudFormation stack for the Attribute Sensor registration ( optional )
+- ECS and EKS cost allocation tags ( optional )
+### Sub
+The following resources are created in the sub account:
+- IAM role for the Loader
+- CloudFormation stack for the Attribute Sensor registration ( optional )
+
 ## Registration Methods
 For now, the module supports two registration methods:
 ### Cloud Formation
-The module will create a CloudFormation stack to register the Attribute Sensor and configure the `Data Export` resource.
+The module will create a CloudFormation stack to register the Attribute Sensor automatically.
 ### Manual
-The Attribute Sensor must be registered manually. Also, in that case, the `Data Export` resource will be created and managed with the module and the `external_id` value must be provided to Attribute to complete the registration process.
+The Attribute Sensor must be registered manually. Also, in that case, the `external_id` value must be provided to Attribute to complete the registration process.
 ## Cost Allocation Tags
 The module can configure the ECS and EKS cost allocation tags. To control this feature, the `configure_ecs_cost_allocation_tags` and `configure_eks_cost_allocation_tags` inputs can be adjusted. The configuration requires access to the AWS Cost Explorer API.
+
+## Upgrading
+### v1 -> v2
+* `ZouzCurExport` must be deleted manually after the upgrade as it's managed by the module now.
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -32,7 +50,7 @@ No modules.
 | [aws_bcmdataexports_export.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/bcmdataexports_export) | resource |
 | [aws_ce_cost_allocation_tag.ecs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ce_cost_allocation_tag) | resource |
 | [aws_ce_cost_allocation_tag.eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ce_cost_allocation_tag) | resource |
-| [aws_cloudformation_stack.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudformation_stack) | resource |
+| [aws_cloudformation_stack.registration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudformation_stack) | resource |
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_acl.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
@@ -45,8 +63,8 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_deployment_id"></a> [deployment\_id](#input\_deployment\_id) | (**Required**) The Deployment ID provided by Attribute. | `string` | n/a | yes |
-| <a name="input_deployment_name"></a> [deployment\_name](#input\_deployment\_name) | (**Required**) The Deployment Name provided by Attribute. | `string` | n/a | yes |
+| <a name="input_account_name"></a> [account\_name](#input\_account\_name) | (**Required**) The AWS Account name. | `string` | n/a | yes |
+| <a name="input_account_type"></a> [account\_type](#input\_account\_type) | (**Required**) The AWS Account type. Available options are: 'management' or 'sub'. | `string` | n/a | yes |
 | <a name="input_external_id"></a> [external\_id](#input\_external\_id) | (**Required**) The External ID used to assume the Loader IAM Role. In case of manual registration, this value must be provided to Attribute. | `string` | n/a | yes |
 | <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | (**Required**) The Organization ID provided by Attribute. | `string` | n/a | yes |
 | <a name="input_configure_ecs_cost_allocation_tags"></a> [configure\_ecs\_cost\_allocation\_tags](#input\_configure\_ecs\_cost\_allocation\_tags) | (*Optional*) Whether to configure the ECS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API. | `bool` | `false` | no |

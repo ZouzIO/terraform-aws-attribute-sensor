@@ -1,6 +1,6 @@
 output "cur_s3_bucket_arn" {
   description = "The S3 bucket where the CUR 2.0 reports are stored."
-  value       = aws_s3_bucket.this.arn
+  value       = var.account_type == "management" ? aws_s3_bucket.this[0].arn : null
 }
 
 output "loader_iam_role_arn" {
@@ -10,7 +10,7 @@ output "loader_iam_role_arn" {
 
 output "cur_s3_bucket_policy_id" {
   description = "The S3 bucket policy applied to the CUR 2.0 bucket."
-  value       = aws_s3_bucket_policy.this.id
+  value       = var.account_type == "management" ? aws_s3_bucket_policy.this[0].id : null
 }
 
 output "external_id" {

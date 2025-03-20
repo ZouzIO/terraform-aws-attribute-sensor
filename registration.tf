@@ -27,4 +27,6 @@ resource "aws_cloudformation_stack" "registration" {
       }
     }
   })
+
+  tags = local.cloudformation_stack_tags
 }

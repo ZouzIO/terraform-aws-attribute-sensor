@@ -2,6 +2,8 @@ resource "aws_s3_bucket" "this" {
   count = var.account_type == "management" ? 1 : 0
 
   bucket = "attribute-cur-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
+
+  tags = local.s3_bucket_tags
 }
 
 resource "aws_s3_bucket_ownership_controls" "this" {
@@ -70,7 +72,6 @@ resource "aws_s3_bucket_policy" "this" {
     }
   )
 }
-
 resource "aws_iam_role" "this" {
   name = "AttributeLoaderV-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
 
@@ -103,6 +104,8 @@ resource "aws_iam_role" "this" {
       )
     })
   }
+
+  tags = local.iam_role_tags
 }
 
 resource "aws_ce_cost_allocation_tag" "eks" {
@@ -155,4 +158,6 @@ resource "aws_bcmdataexports_export" "this" {
       frequency = "SYNCHRONOUS"
     }
   }
+
+  tags = local.bcm_data_exports_tags
 }

@@ -84,6 +84,8 @@ locals {
       Action = [
         "ec2:List*",
         "ec2:Describe*",
+        "ec2:GetManagedPrefixListEntries",
+        "ec2:SearchTransitGatewayRoutes",
         "ecs:List*",
         "ecs:Describe*",
         "eks:List*",
@@ -170,4 +172,9 @@ locals {
       ]
     },
   ] : []
+
+  s3_bucket_tags            = merge(try(var.resource_tags["s3_bucket"], {}), var.general_tags)
+  iam_role_tags             = merge(try(var.resource_tags["iam_role"], {}), var.general_tags)
+  cloudformation_stack_tags = merge(try(var.resource_tags["cloudformation_stack"], {}), var.general_tags)
+  bcm_data_exports_tags     = merge(try(var.resource_tags["bcmdataexports_export"], {}), var.general_tags)
 }

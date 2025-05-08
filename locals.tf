@@ -84,6 +84,8 @@ locals {
       Action = [
         "ec2:List*",
         "ec2:Describe*",
+        "ec2:GetManagedPrefixListEntries",
+        "ec2:SearchTransitGatewayRoutes",
         "ecs:List*",
         "ecs:Describe*",
         "eks:List*",

@@ -56,12 +56,6 @@ locals {
       Resource = "*"
     },
     {
-      Sid      = "CloudTrailReader"
-      Effect   = "Allow"
-      Action   = "cloudtrail:LookupEvents"
-      Resource = "*"
-    },
-    {
       Sid    = "S3Explorer"
       Effect = "Allow"
       Action = [
@@ -173,6 +167,14 @@ locals {
     },
   ] : []
 
+  cloudtrail_reader = var.cloudtrail_enabled ? [
+    {
+      Sid      = "CloudTrailReader"
+      Effect   = "Allow"
+      Action   = "cloudtrail:LookupEvents"
+      Resource = "*"
+    },
+  ] : []
   s3_bucket_tags            = merge(try(var.resource_tags["s3_bucket"], {}), var.general_tags)
   iam_role_tags             = merge(try(var.resource_tags["iam_role"], {}), var.general_tags)
   cloudformation_stack_tags = merge(try(var.resource_tags["cloudformation_stack"], {}), var.general_tags)

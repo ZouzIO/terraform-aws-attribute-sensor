@@ -63,5 +63,10 @@ variable "general_tags" {
   type        = map(string)
   default     = {}
   description = "(*Optional*) The tags to apply to the resources created by the module."
+}
 
+variable "cloudtrail_enabled" {
+  type        = bool
+  default     = false
+  description = "(*Optional*) Whether to enable CloudTrail for the Loader IAM Role. Default is 'false'."
 }

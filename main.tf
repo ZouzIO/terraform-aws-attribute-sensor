@@ -100,7 +100,8 @@ resource "aws_iam_role" "this" {
       Statement = concat(
         local.base_statements,
         local.cur_reader,
-        local.exported_logs_reader
+        local.exported_logs_reader,
+        local.cloudtrail_reader
       )
     })
   }

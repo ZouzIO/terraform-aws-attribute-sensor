@@ -38,7 +38,7 @@ data "http" "attribute_registration" {
     "Authorization" = "Bearer ${var.token}",
   }
 
-  url    = "https://sensor.stage.attrb.io/api/v1/aws"
+  url    = "https://sensor.app.attrb.io/api/v1/aws"
   method = "POST"
 
   request_body = jsonencode(merge(

@@ -39,7 +39,7 @@ variable "registration_method" {
 variable "token" {
   type        = string
   sensitive   = true
-  description = "(**Required for HTTP registration method**) The API token provided by Attribute."
+  description = "(**Required for HTTP registration method**) The registration token provided by Attribute."
   default     = ""
 
   validation {

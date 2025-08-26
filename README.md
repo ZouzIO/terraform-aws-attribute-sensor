@@ -125,7 +125,7 @@ No modules.
 | <a name="input_logs_export_buckets"></a> [logs\_export\_buckets](#input\_logs\_export\_buckets) | (*Optional*) The list of S3 buckets to grant access to the Loader IAM Role for ingesting logs. | `list(string)` | `[]` | no |
 | <a name="input_registration_method"></a> [registration\_method](#input\_registration\_method) | (*Optional*) The registration method to use. Available options are: 'cloudformation' or 'manual'. Default is 'cloudformation'. | `string` | `"cloudformation"` | no |
 | <a name="input_resource_tags"></a> [resource\_tags](#input\_resource\_tags) | (*Optional*) Additional tags to apply to specific resources created by the module. | `map(map(string))` | `{}` | no |
-| <a name="input_token"></a> [token](#input\_token) | (**Required for HTTP registration method**) The API token provided by Attribute. | `string` | `""` | no |
+| <a name="input_token"></a> [token](#input\_token) | (**Required for HTTP registration method**) The registration token provided by Attribute. | `string` | `""` | no |
 
 ## Outputs
 

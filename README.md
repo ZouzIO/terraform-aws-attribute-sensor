@@ -17,9 +17,11 @@ The following resources are created in the sub account:
 - CloudFormation stack for the Attribute Sensor registration ( optional )
 
 ## Registration Methods
-For now, the module supports two registration methods:
+For now, the module supports three registration methods:
 ### Cloud Formation
 The module will create a CloudFormation stack to register the Attribute Sensor automatically.
+### HTTP
+The module invokes an HTTP request in order to register the Attribute Sensor automatically. In this case, the `token` value must be provided to authenticate the request.
 ### Manual
 The Attribute Sensor must be registered manually. Also, in that case, the `external_id` value must be provided to Attribute to complete the registration process.
 ## Cost Allocation Tags
@@ -85,6 +87,7 @@ will result in the following tags for the S3 bucket:
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.47.0, < 6.0.0 |
+| <a name="provider_http"></a> [http](#provider\_http) | n/a |
 
 ## Modules
 
@@ -105,6 +108,7 @@ No modules.
 | [aws_s3_bucket_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
+| [http_http.attribute_registration](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
 
 ## Inputs
 
@@ -121,6 +125,7 @@ No modules.
 | <a name="input_logs_export_buckets"></a> [logs\_export\_buckets](#input\_logs\_export\_buckets) | (*Optional*) The list of S3 buckets to grant access to the Loader IAM Role for ingesting logs. | `list(string)` | `[]` | no |
 | <a name="input_registration_method"></a> [registration\_method](#input\_registration\_method) | (*Optional*) The registration method to use. Available options are: 'cloudformation' or 'manual'. Default is 'cloudformation'. | `string` | `"cloudformation"` | no |
 | <a name="input_resource_tags"></a> [resource\_tags](#input\_resource\_tags) | (*Optional*) Additional tags to apply to specific resources created by the module. | `map(map(string))` | `{}` | no |
+| <a name="input_token"></a> [token](#input\_token) | (**Required for HTTP registration method**) The API token provided by Attribute. | `string` | `""` | no |
 
 ## Outputs
 

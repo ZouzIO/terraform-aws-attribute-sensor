@@ -31,10 +31,23 @@ variable "registration_method" {
   default     = "cloudformation"
 
   validation {
-    condition     = contains(["cloudformation", "manual"], var.registration_method)
-    error_message = "Invalid registration method. Must be 'cloudformation' or 'manual'."
+    condition     = contains(["cloudformation", "manual", "http"], var.registration_method)
+    error_message = "Invalid registration method. Must be 'cloudformation', 'http' or 'manual'."
   }
 }
+
+variable "token" {
+  type        = string
+  sensitive   = true
+  description = "(**Required for HTTP registration method**) The API token provided by Attribute."
+  default     = ""
+
+  validation {
+    condition     = var.registration_method != "http" || length(var.token) > 0
+    error_message = "Token is required when registration_method = \"http\"."
+  }
+}
+
 variable "configure_eks_cost_allocation_tags" {
   type        = bool
   description = "(*Optional*) Whether to configure the EKS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API."

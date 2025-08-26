@@ -41,11 +41,6 @@ variable "token" {
   sensitive   = true
   description = "(**Required for HTTP registration method**) The registration token provided by Attribute."
   default     = ""
-
-  validation {
-    condition     = var.registration_method != "http" || length(var.token) > 0
-    error_message = "Token is required when registration_method = \"http\"."
-  }
 }
 
 variable "configure_eks_cost_allocation_tags" {

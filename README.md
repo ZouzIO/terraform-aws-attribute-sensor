@@ -123,6 +123,7 @@ No modules.
 | <a name="input_configure_eks_cost_allocation_tags"></a> [configure\_eks\_cost\_allocation\_tags](#input\_configure\_eks\_cost\_allocation\_tags) | (*Optional*) Whether to configure the EKS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API. | `bool` | `true` | no |
 | <a name="input_general_tags"></a> [general\_tags](#input\_general\_tags) | (*Optional*) The tags to apply to the resources created by the module. | `map(string)` | `{}` | no |
 | <a name="input_logs_export_buckets"></a> [logs\_export\_buckets](#input\_logs\_export\_buckets) | (*Optional*) The list of S3 buckets to grant access to the Loader IAM Role for ingesting logs. | `list(string)` | `[]` | no |
+| <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | (*Optional*) The prefix to use for naming resources created by the module. | `string` | `""` | no |
 | <a name="input_registration_method"></a> [registration\_method](#input\_registration\_method) | (*Optional*) The registration method to use. Available options are: 'cloudformation' or 'manual'. Default is 'cloudformation'. | `string` | `"cloudformation"` | no |
 | <a name="input_resource_tags"></a> [resource\_tags](#input\_resource\_tags) | (*Optional*) Additional tags to apply to specific resources created by the module. | `map(map(string))` | `{}` | no |
 | <a name="input_token"></a> [token](#input\_token) | (**Required for HTTP registration method**) The registration token provided by Attribute. | `string` | `""` | no |
@@ -131,6 +132,8 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_cur_export_name"></a> [cur\_export\_name](#output\_cur\_export\_name) | The name of the CUR 2.0 report definition. |
+| <a name="output_cur_prefix"></a> [cur\_prefix](#output\_cur\_prefix) | The prefix within the S3 bucket where the CUR 2.0 reports are stored. |
 | <a name="output_cur_s3_bucket_arn"></a> [cur\_s3\_bucket\_arn](#output\_cur\_s3\_bucket\_arn) | The S3 bucket where the CUR 2.0 reports are stored. |
 | <a name="output_cur_s3_bucket_policy_id"></a> [cur\_s3\_bucket\_policy\_id](#output\_cur\_s3\_bucket\_policy\_id) | The S3 bucket policy applied to the CUR 2.0 bucket. |
 | <a name="output_external_id"></a> [external\_id](#output\_external\_id) | The External ID used to assume the Loader IAM Role. |

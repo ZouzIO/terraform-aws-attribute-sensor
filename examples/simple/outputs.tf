@@ -1,30 +1,25 @@
 output "cur_s3_bucket_arn" {
   description = "The S3 bucket where the CUR 2.0 reports are stored."
-  value       = var.account_type == "management" ? aws_s3_bucket.this[0].arn : null
+  value       = var.account_type == "management" ? module.attribute_sensor.cur_s3_bucket_arn : null
 }
 
 output "cur_export_name" {
   description = "The name of the CUR 2.0 report definition."
-  value       = var.account_type == "management" ? local.export_name : null
+  value       = var.account_type == "management" ? module.attribute_sensor.cur_export_name : null
 }
 
 output "cur_prefix" {
   description = "The prefix within the S3 bucket where the CUR 2.0 reports are stored."
-  value       = var.account_type == "management" ? local.s3_prefix : null
+  value       = var.account_type == "management" ? module.attribute_sensor.cur_prefix : null
 }
 
 output "loader_iam_role_arn" {
   description = "The IAM role used by the loader to access the CUR 2.0 data."
-  value       = aws_iam_role.this.arn
-}
-
-output "cur_s3_bucket_policy_id" {
-  description = "The S3 bucket policy applied to the CUR 2.0 bucket."
-  value       = var.account_type == "management" ? aws_s3_bucket_policy.this[0].id : null
+  value       = module.attribute_sensor.loader_iam_role_arn
 }
 
 output "external_id" {
   sensitive   = true
   description = "The External ID used to assume the Loader IAM Role."
-  value       = var.external_id
+  value       = module.attribute_sensor.external_id
 }

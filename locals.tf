@@ -11,7 +11,7 @@ locals {
 
   s3_prefix = "attributeexport"
 
-  export_name = "AttributeCurExport"
+  export_name = "${local.name_prefix}AttributeCurExport"
 
   logs_export_buckets = flatten([
     for bucket in var.logs_export_buckets : [
@@ -179,4 +179,5 @@ locals {
   iam_role_tags             = merge(try(var.resource_tags["iam_role"], {}), var.general_tags)
   cloudformation_stack_tags = merge(try(var.resource_tags["cloudformation_stack"], {}), var.general_tags)
   bcm_data_exports_tags     = merge(try(var.resource_tags["bcmdataexports_export"], {}), var.general_tags)
+  name_prefix               = length(var.name_prefix) > 0 ? "${var.name_prefix}-" : ""
 }

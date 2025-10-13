@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "this" {
   count = var.account_type == "management" ? 1 : 0
 
-  bucket = "attribute-cur-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
+  bucket = "${local.name_prefix}attribute-cur-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
 
   tags = local.s3_bucket_tags
 }
@@ -73,7 +73,7 @@ resource "aws_s3_bucket_policy" "this" {
   )
 }
 resource "aws_iam_role" "this" {
-  name = "AttributeLoaderV-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
+  name = "${local.name_prefix}AttributeLoaderV-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -162,4 +162,11 @@ resource "aws_bcmdataexports_export" "this" {
   }
 
   tags = local.bcm_data_exports_tags
+
+  # To avoid "S3 bucket permission validation failed"
+  depends_on = [
+    aws_s3_bucket_policy.this,
+    aws_s3_bucket_acl.this,
+    aws_s3_bucket_ownership_controls.this,
+  ]
 }

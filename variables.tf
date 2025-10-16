@@ -1,3 +1,9 @@
+variable "name_prefix" {
+  type        = string
+  description = "(*Optional*) The prefix to use for naming resources created by the module."
+  default     = ""
+}
+
 variable "organization_id" {
   type        = string
   description = "(**Required**) The Organization ID provided by Attribute."

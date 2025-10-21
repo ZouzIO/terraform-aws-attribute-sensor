@@ -1,4 +1,7 @@
 locals {
+  # v5.xx compatibility
+  region = lookup(data.aws_region.current, "region", data.aws_region.current.name)
+
   eks_cost_allocation_tags = [
     "aws:autoscaling:groupName",
     "aws:eks:cluster-name"
@@ -26,8 +29,8 @@ locals {
       Effect = "Allow"
       Action = "bcm-data-exports:CreateExport"
       Resource = [
-        "arn:aws:bcm-data-exports:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:export/*",
-        "arn:aws:bcm-data-exports:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:table/COST_AND_USAGE_REPORT"
+        "arn:aws:bcm-data-exports:${local.region}:${data.aws_caller_identity.current.account_id}:export/*",
+        "arn:aws:bcm-data-exports:${local.region}:${data.aws_caller_identity.current.account_id}:table/COST_AND_USAGE_REPORT"
       ]
     },
     {
@@ -35,7 +38,7 @@ locals {
       Effect = "Allow"
       Action = "cur:putReportDefinition"
       Resource = [
-        "arn:aws:cur:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:/putReportDefinition"
+        "arn:aws:cur:${local.region}:${data.aws_caller_identity.current.account_id}:/putReportDefinition"
       ]
     },
     {

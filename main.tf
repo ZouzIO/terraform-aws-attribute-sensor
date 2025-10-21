@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "this" {
   count = var.account_type == "management" ? 1 : 0
 
-  bucket = "${local.name_prefix}attribute-cur-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
+  bucket = "${local.name_prefix}attribute-cur-${local.region}-${data.aws_caller_identity.current.account_id}"
 
   tags = local.s3_bucket_tags
 }
@@ -17,8 +17,8 @@ resource "aws_s3_bucket_ownership_controls" "this" {
 
   lifecycle {
     precondition {
-      condition     = data.aws_region.current.name == "us-east-1"
-      error_message = "The region for the registration must be set us-east-1 (currently ${data.aws_region.current.name}). Please update the region and try again."
+      condition     = local.region == "us-east-1"
+      error_message = "The region for the registration must be set us-east-1 (currently ${local.region}). Please update the region and try again."
     }
   }
 }
@@ -61,8 +61,8 @@ resource "aws_s3_bucket_policy" "this" {
         Condition = {
           StringLike = {
             "aws:SourceArn" = [
-              "arn:aws:cur:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:definition/*",
-              "arn:aws:bcm-data-exports:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:export/*"
+              "arn:aws:cur:${local.region}:${data.aws_caller_identity.current.account_id}:definition/*",
+              "arn:aws:bcm-data-exports:${local.region}:${data.aws_caller_identity.current.account_id}:export/*"
             ]
             "aws:SourceAccount" = data.aws_caller_identity.current.account_id
           }
@@ -73,7 +73,7 @@ resource "aws_s3_bucket_policy" "this" {
   )
 }
 resource "aws_iam_role" "this" {
-  name = "${local.name_prefix}AttributeLoaderV-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
+  name = "${local.name_prefix}AttributeLoaderV-${local.region}-${data.aws_caller_identity.current.account_id}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -93,20 +93,22 @@ resource "aws_iam_role" "this" {
     ]
   })
 
-  inline_policy {
-    name = "ResourceAccessor"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = concat(
-        local.base_statements,
-        local.cur_reader,
-        local.exported_logs_reader,
-        local.cloudtrail_reader
-      )
-    })
-  }
-
   tags = local.iam_role_tags
+}
+
+resource "aws_iam_role_policy" "this" {
+  name = "ResourceAccessor"
+  role = aws_iam_role.this.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat(
+      local.base_statements,
+      local.cur_reader,
+      local.exported_logs_reader,
+      local.cloudtrail_reader
+    )
+  })
 }
 
 resource "aws_ce_cost_allocation_tag" "eks" {

@@ -1,4 +1,5 @@
 locals {
+  bcm_query_file_path = var.managed_by_reseller ? "${path.module}/files/bcm_cur_query_reseller.sql" : "${path.module}/files/bcm_cur_query.sql"
   # v5.xx compatibility
   region = lookup(data.aws_region.current, "region", data.aws_region.current.name)
 

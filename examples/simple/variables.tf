@@ -39,3 +39,9 @@ variable "token" {
   description = "(**Required for HTTP registration method**) The registration token provided by Attribute."
   default     = ""
 }
+
+variable "managed_by_reseller" {
+  type        = bool
+  description = "(Optional) Whether the account is managed by a reseller. Default is false."
+  default     = false
+}

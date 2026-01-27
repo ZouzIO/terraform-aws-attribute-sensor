@@ -15,4 +15,5 @@ module "attribute_sensor" {
   general_tags        = var.general_tags
   registration_method = var.registration_method
   token               = var.token
+  managed_by_reseller = var.managed_by_reseller
 }

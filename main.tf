@@ -132,7 +132,7 @@ resource "aws_bcmdataexports_export" "this" {
     name        = local.export_name
     description = local.export_name
     data_query {
-      query_statement = file("${path.module}/files/bcm_cur_query.sql")
+      query_statement = file(local.bcm_query_file_path)
 
       table_configurations = {
         COST_AND_USAGE_REPORT = {
@@ -140,7 +140,7 @@ resource "aws_bcmdataexports_export" "this" {
           TIME_GRANULARITY                      = "HOURLY",
           INCLUDE_RESOURCES                     = "TRUE",
           INCLUDE_MANUAL_DISCOUNT_COMPATIBILITY = "FALSE",
-          INCLUDE_SPLIT_COST_ALLOCATION_DATA    = "TRUE",
+          INCLUDE_SPLIT_COST_ALLOCATION_DATA    = var.managed_by_reseller ? "FALSE" : "TRUE",
         }
       }
     }

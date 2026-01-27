@@ -84,3 +84,9 @@ variable "cloudtrail_enabled" {
   default     = false
   description = "(*Optional*) Whether to enable CloudTrail for the Loader IAM Role. Default is 'false'."
 }
+
+variable "managed_by_reseller" {
+  type        = bool
+  default     = false
+  description = "(*Optional*) Whether the AWS Account is managed by a reseller. Enabling this option disables the 'Split Cost Allocation' feature. Default is 'false'."
+}

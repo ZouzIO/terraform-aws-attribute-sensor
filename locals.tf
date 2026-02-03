@@ -80,6 +80,7 @@ locals {
       Sid    = "AWSDescriber"
       Effect = "Allow"
       Action = [
+        "autoscaling:Describe*",
         "ec2:List*",
         "ec2:Describe*",
         "ec2:GetManagedPrefixListEntries",

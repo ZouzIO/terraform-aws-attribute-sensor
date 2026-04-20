@@ -24,7 +24,7 @@ locals {
     ]
   ])
 
-  base_statements = [
+  management_billing_statements = var.account_type == "management" ? [
     {
       Sid    = "CURExportCreator"
       Effect = "Allow"
@@ -37,11 +37,12 @@ locals {
     {
       Sid    = "CURExportDefinitionPlacer"
       Effect = "Allow"
-      Action = "cur:putReportDefinition"
-      Resource = [
-        "arn:aws:cur:${local.region}:${data.aws_caller_identity.current.account_id}:/putReportDefinition"
-      ]
+      Action = "cur:PutReportDefinition"
+      Resource = "*"
     },
+  ] : []
+
+  base_statements = [
     {
       Sid    = "CURTagsSetter"
       Effect = "Allow"
@@ -143,7 +144,7 @@ locals {
       ]
       Resource = "*"
     }
-  ]
+  ] 
 
   exported_logs_reader = length(local.logs_export_buckets) > 0 ? [
     {

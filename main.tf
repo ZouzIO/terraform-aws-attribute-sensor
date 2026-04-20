@@ -103,6 +103,7 @@ resource "aws_iam_role_policy" "this" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = concat(
+      local.management_billing_statements,
       local.base_statements,
       local.cur_reader,
       local.exported_logs_reader,

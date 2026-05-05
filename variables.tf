@@ -90,3 +90,9 @@ variable "managed_by_reseller" {
   default     = false
   description = "(*Optional*) Whether the AWS Account is managed by a reseller. Enabling this option disables the 'Split Cost Allocation' feature. Default is 'false'."
 }
+
+variable "additional_policy" {
+  type        = string
+  default     = ""
+  description = "(*Optional*) A JSON IAM policy document attached as an additional inline policy on the Loader IAM Role. Build it with `jsonencode(...)` or `data.aws_iam_policy_document`. Leave empty to skip."
+}

@@ -75,6 +75,33 @@ will result in the following tags for the S3 bucket:
   "used_by"    = "attribute-sensor"
 }
 ```
+## Additional policies
+In case the default permissions of the Loader IAM Role are not sufficient, an additional inline policy can be attached to the role using the `additional_policy` input. The policy must be provided in a JSON format, for example, using `jsonencode(...)` or `data.aws_iam_policy_document`. If the `additional_policy` input is left empty, no additional policy will be attached to the role.
+
+```hcl
+module "attribute_sensor" {
+  # Some fields omitted for brevity
+
+  additional_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ExtraBucketReader"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          "arn:aws:s3:::my-extra-bucket",
+          "arn:aws:s3:::my-extra-bucket/*",
+        ]
+      },
+    ]
+  })
+}
+```
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -102,6 +129,7 @@ No modules.
 | [aws_ce_cost_allocation_tag.eks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ce_cost_allocation_tag) | resource |
 | [aws_cloudformation_stack.registration](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudformation_stack) | resource |
 | [aws_iam_role.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
+| [aws_iam_role_policy.additional](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_iam_role_policy.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_acl.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
@@ -119,6 +147,7 @@ No modules.
 | <a name="input_account_type"></a> [account\_type](#input\_account\_type) | (**Required**) The AWS Account type. Available options are: 'management' or 'sub'. | `string` | n/a | yes |
 | <a name="input_external_id"></a> [external\_id](#input\_external\_id) | (**Required**) The External ID used to assume the Loader IAM Role. In case of manual registration, this value must be provided to Attribute. | `string` | n/a | yes |
 | <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | (**Required**) The Organization ID provided by Attribute. | `string` | n/a | yes |
+| <a name="input_additional_policy"></a> [additional\_policy](#input\_additional\_policy) | (*Optional*) A JSON IAM policy document attached as an additional inline policy on the Loader IAM Role. Build it with `jsonencode(...)` or `data.aws_iam_policy_document`. Leave empty to skip. | `string` | `""` | no |
 | <a name="input_cloudtrail_enabled"></a> [cloudtrail\_enabled](#input\_cloudtrail\_enabled) | (*Optional*) Whether to enable CloudTrail for the Loader IAM Role. Default is 'false'. | `bool` | `false` | no |
 | <a name="input_configure_ecs_cost_allocation_tags"></a> [configure\_ecs\_cost\_allocation\_tags](#input\_configure\_ecs\_cost\_allocation\_tags) | (*Optional*) Whether to configure the ECS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API. | `bool` | `true` | no |
 | <a name="input_configure_eks_cost_allocation_tags"></a> [configure\_eks\_cost\_allocation\_tags](#input\_configure\_eks\_cost\_allocation\_tags) | (*Optional*) Whether to configure the EKS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API. | `bool` | `true` | no |

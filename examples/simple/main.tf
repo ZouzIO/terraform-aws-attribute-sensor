@@ -16,4 +16,5 @@ module "attribute_sensor" {
   registration_method = var.registration_method
   token               = var.token
   managed_by_reseller = var.managed_by_reseller
+  additional_policy   = var.additional_policy
 }

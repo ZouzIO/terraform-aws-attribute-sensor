@@ -112,6 +112,14 @@ resource "aws_iam_role_policy" "this" {
   })
 }
 
+resource "aws_iam_role_policy" "additional" {
+  count = length(var.additional_policy) > 0 ? 1 : 0
+
+  name   = "Additional"
+  role   = aws_iam_role.this.id
+  policy = var.additional_policy
+}
+
 resource "aws_ce_cost_allocation_tag" "eks" {
   for_each = (var.configure_eks_cost_allocation_tags && var.account_type == "management") ? toset(local.eks_cost_allocation_tags) : []
 

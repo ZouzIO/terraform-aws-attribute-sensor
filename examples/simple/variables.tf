@@ -45,3 +45,9 @@ variable "managed_by_reseller" {
   description = "(Optional) Whether the account is managed by a reseller. Default is false."
   default     = false
 }
+
+variable "additional_policy" {
+  type        = string
+  description = "(*Optional*) JSON IAM policy attached as an extra inline policy on the Loader role."
+  default     = ""
+}

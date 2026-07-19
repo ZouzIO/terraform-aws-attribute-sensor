@@ -32,18 +32,202 @@ The module can configure the ECS and EKS cost allocation tags. To control this f
 * The `ZouzCurExport` Billing Data Export must be deleted manually after the upgrade as it's managed by the module now.
 
 ## Permissions required
-In order to use the module, the following permissions are required:
-| **Service**                                              | **Permissions**                                                                                                           |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **BCM (bcmdataexports_export)**                          | `bcm:CreateDataExport`, `bcm:DeleteDataExport`, `bcm:DescribeDataExports`                                                 |
-| **Cost Explorer (ce_cost_allocation_tag)**               | `ce:CreateCostAllocationTag`, `ce:DescribeCostAllocationTags`, `ce:UpdateCostAllocationTag`                               |
-| **CloudFormation (cloudformation_stack)**                | `cloudformation:CreateStack`, `cloudformation:DescribeStacks`, `cloudformation:UpdateStack`, `cloudformation:DeleteStack` |
-| **IAM (iam_role)**                                       | `iam:CreateRole`, `iam:PutRolePolicy`, `iam:DeleteRole`, `iam:DeleteRolePolicy`, `iam:ListRoles`                          |
-| **S3 Bucket (s3_bucket)**                                | `s3:CreateBucket`, `s3:DeleteBucket`, `s3:ListBucket`, `s3:GetBucketLocation`                                             |
-| **S3 Bucket ACL (s3_bucket_acl)**                        | `s3:PutBucketAcl`, `s3:GetBucketAcl`                                                                                      |
-| **S3 Ownership Controls (s3_bucket_ownership_controls)** | `s3:PutBucketOwnershipControls`, `s3:GetBucketOwnershipControls`                                                          |
-| **S3 Bucket Policy (s3_bucket_policy)**                  | `s3:PutBucketPolicy`, `s3:GetBucketPolicy`, `s3:DeleteBucketPolicy`                                                       |
-| **STS (caller_identity)**                                | `sts:GetCallerIdentity`                                                                                                   |
+This section describes the permissions required by the principal that **executes Terraform** (`terraform apply` / `terraform destroy`). These are not the permissions of the Loader IAM Role — that role and its policies are created by the module itself.
+
+A few non-obvious requirements to be aware of:
+- **The CloudFormation registration publishes to an SNS topic.** With `registration_method = "cloudformation"` the stack contains a custom resource whose `ServiceToken` is an SNS topic in the Attribute account. CloudFormation delivers the registration message (on both stack create **and** delete) using the credentials of the principal that runs the stack operation, so the principal needs `sns:Publish` on the Attribute topic. Because the topic is encrypted at rest, the principal also needs `kms:GenerateDataKey` and `kms:Decrypt` on the topic's KMS key — scoped with the `kms:ViaService` condition below, since the key lives in the Attribute account.
+- **BCM Data Exports needs a CUR permission too.** Creating a CUR 2.0 export requires `cur:PutReportDefinition` in addition to the `bcm-data-exports:*` actions. Note the IAM action prefix is `bcm-data-exports:`, not `bcm:`.
+- **The `aws_s3_bucket` resource reads more than the module manages.** During refresh the AWS provider reads every bucket sub-configuration (versioning, logging, CORS, encryption, lifecycle, replication, etc.), so the policy must include the corresponding `s3:Get*` actions even though the module never configures them.
+- **Destroy needs extra IAM reads.** Deleting the Loader IAM Role requires `iam:ListInstanceProfilesForRole` in addition to the `iam:Delete*` actions.
+- **Cost allocation tags are management-only and enabled by default.** `ce:ListCostAllocationTags` / `ce:UpdateCostAllocationTagsStatus` can only be called from the management (payer) account. Set `configure_ecs_cost_allocation_tags = false` and `configure_eks_cost_allocation_tags = false` to drop this requirement.
+- The module also calls `sts:GetCallerIdentity`, which requires no explicit permissions.
+
+Replace `<ACCOUNT_ID>` in the policies below with the ID of the AWS account the module is applied to. The wildcards in the resource ARNs account for an optional `name_prefix`. If you use the `http` or `manual` registration method, the `Registration*` statements can be removed.
+
+### Management account
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "CurBucketManager",
+      "Effect": "Allow",
+      "Action": [
+        "s3:CreateBucket",
+        "s3:DeleteBucket",
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketTagging",
+        "s3:PutBucketTagging",
+        "s3:GetBucketAcl",
+        "s3:PutBucketAcl",
+        "s3:GetBucketOwnershipControls",
+        "s3:PutBucketOwnershipControls",
+        "s3:GetBucketPolicy",
+        "s3:PutBucketPolicy",
+        "s3:DeleteBucketPolicy",
+        "s3:GetBucketVersioning",
+        "s3:GetBucketRequestPayment",
+        "s3:GetBucketLogging",
+        "s3:GetBucketWebsite",
+        "s3:GetBucketCORS",
+        "s3:GetBucketObjectLockConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:GetAccelerateConfiguration",
+        "s3:GetEncryptionConfiguration"
+      ],
+      "Resource": "arn:aws:s3:::*attribute-cur-us-east-1-<ACCOUNT_ID>"
+    },
+    {
+      "Sid": "CurExportManager",
+      "Effect": "Allow",
+      "Action": [
+        "bcm-data-exports:CreateExport",
+        "bcm-data-exports:GetExport",
+        "bcm-data-exports:UpdateExport",
+        "bcm-data-exports:DeleteExport",
+        "bcm-data-exports:ListTagsForResource",
+        "bcm-data-exports:TagResource",
+        "bcm-data-exports:UntagResource"
+      ],
+      "Resource": [
+        "arn:aws:bcm-data-exports:us-east-1:<ACCOUNT_ID>:export/*",
+        "arn:aws:bcm-data-exports:us-east-1:<ACCOUNT_ID>:table/COST_AND_USAGE_REPORT"
+      ]
+    },
+    {
+      "Sid": "CurReportDefinitionPlacer",
+      "Effect": "Allow",
+      "Action": "cur:PutReportDefinition",
+      "Resource": "*"
+    },
+    {
+      "Sid": "CostAllocationTagsConfigurer",
+      "Effect": "Allow",
+      "Action": [
+        "ce:ListCostAllocationTags",
+        "ce:UpdateCostAllocationTagsStatus"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "LoaderRoleManager",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:GetRole",
+        "iam:UpdateRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:DeleteRole",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:PutRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListInstanceProfilesForRole"
+      ],
+      "Resource": "arn:aws:iam::<ACCOUNT_ID>:role/*AttributeLoaderV-*"
+    },
+    {
+      "Sid": "RegistrationStackManager",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "cloudformation:DescribeStacks",
+        "cloudformation:GetTemplate",
+        "cloudformation:GetStackPolicy",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack"
+      ],
+      "Resource": "arn:aws:cloudformation:*:<ACCOUNT_ID>:stack/*AttributeRegistration/*"
+    },
+    {
+      "Sid": "RegistrationMessagePublisher",
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:us-east-1:405726414835:ZouzDeploymentRegistration"
+    },
+    {
+      "Sid": "RegistrationTopicKeyUser",
+      "Effect": "Allow",
+      "Action": [
+        "kms:GenerateDataKey",
+        "kms:Decrypt"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "sns.us-east-1.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
+```
+### Sub account
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LoaderRoleManager",
+      "Effect": "Allow",
+      "Action": [
+        "iam:CreateRole",
+        "iam:GetRole",
+        "iam:UpdateRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:DeleteRole",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:PutRolePolicy",
+        "iam:GetRolePolicy",
+        "iam:DeleteRolePolicy",
+        "iam:ListRolePolicies",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListInstanceProfilesForRole"
+      ],
+      "Resource": "arn:aws:iam::<ACCOUNT_ID>:role/*AttributeLoaderV-*"
+    },
+    {
+      "Sid": "RegistrationStackManager",
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "cloudformation:DescribeStacks",
+        "cloudformation:GetTemplate",
+        "cloudformation:GetStackPolicy",
+        "cloudformation:UpdateStack",
+        "cloudformation:DeleteStack"
+      ],
+      "Resource": "arn:aws:cloudformation:*:<ACCOUNT_ID>:stack/*AttributeRegistration/*"
+    },
+    {
+      "Sid": "RegistrationMessagePublisher",
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:us-east-1:405726414835:ZouzDeploymentRegistration"
+    },
+    {
+      "Sid": "RegistrationTopicKeyUser",
+      "Effect": "Allow",
+      "Action": [
+        "kms:GenerateDataKey",
+        "kms:Decrypt"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "kms:ViaService": "sns.us-east-1.amazonaws.com"
+        }
+      }
+    }
+  ]
+}
+```
 ## Adding tags to created resources
 Two inputs can be used to add tags to the created resources:
 - `general_tags` - a map of tags to be added to all resources provisioned by the module

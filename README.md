@@ -3,7 +3,7 @@ The module provisions all required infrastracture resources for the Attribute Se
 ## Account types
 The module supports two account types: `management` and `sub`. You can use a single `manamgement` account and multiple `sub` accounts in the same organization.
 ### Management
-**Management account resources must be created in the `us-east-1` region.**
+**The AWS provider must be configured for the `us-east-1` region.** Only the CUR S3 bucket can be placed in another region, see [CUR bucket region](#cur-bucket-region).
 
 The following resources are created in the management account:
 - S3 bucket and ACLs for the CUR 2.0 reports
@@ -27,7 +27,28 @@ The Attribute Sensor must be registered manually. Also, in that case, the `exter
 ## Cost Allocation Tags
 The module can configure the ECS and EKS cost allocation tags. To control this feature, the `configure_ecs_cost_allocation_tags` and `configure_eks_cost_allocation_tags` inputs can be adjusted. The configuration requires access to the AWS Cost Explorer API.
 
+## CUR bucket region
+By default the CUR S3 bucket is created in the provider's region, `us-east-1`. To keep the bucket and the billing data in another region, set the `bucket_region` input:
+```hcl
+provider "aws" {
+  region = "us-east-1"
+}
+
+module "attribute_sensor" {
+  # Some fields omitted for brevity
+
+  account_type  = "management"
+  bucket_region = "eu-central-1"
+}
+```
+- **Only the bucket moves.** The provider must stay in `us-east-1`: the Billing Data Export and the CloudFormation registration can only be created there.
+- **The bucket name stays the same.** It is built from the provider's region whatever `bucket_region` is (`attribute-cur-us-east-1-<ACCOUNT_ID>`), so the policies in [Permissions required](#permissions-required) apply unchanged.
+- **Choose the region before the first apply.** A bucket cannot be moved: changing `bucket_region` later makes Terraform replace both the bucket and the Billing Data Export. The apply fails with `BucketNotEmpty` until the old bucket is emptied by hand, the billing data exported so far is not copied to the new bucket, and S3 can take a while to release the bucket name for the new region, so the apply may have to be re-run.
+- The input has no effect on `sub` accounts, as they have no bucket.
+
 ## Upgrading
+### v3 -> v4
+* AWS provider `>= 6.0.0` is required, v5 is no longer supported. Follow the [AWS provider v6 upgrade guide](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-6-upgrade) for the rest of your configuration; the module's own inputs and resources are unchanged. To stay on AWS provider v5, keep the module pinned to `~> 3.0`.
 ### v1 -> v2
 * The `ZouzCurExport` Billing Data Export must be deleted manually after the upgrade as it's managed by the module now.
 
@@ -291,13 +312,13 @@ module "attribute_sensor" {
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.48.0, < 7.0.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0.0, < 7.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.48.0, < 7.0.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0.0, < 7.0.0 |
 | <a name="provider_http"></a> [http](#provider\_http) | n/a |
 
 ## Modules
@@ -332,6 +353,7 @@ No modules.
 | <a name="input_external_id"></a> [external\_id](#input\_external\_id) | (**Required**) The External ID used to assume the Loader IAM Role. In case of manual registration, this value must be provided to Attribute. | `string` | n/a | yes |
 | <a name="input_organization_id"></a> [organization\_id](#input\_organization\_id) | (**Required**) The Organization ID provided by Attribute. | `string` | n/a | yes |
 | <a name="input_additional_policy"></a> [additional\_policy](#input\_additional\_policy) | (*Optional*) A JSON IAM policy document attached as an additional inline policy on the Loader IAM Role. Build it with `jsonencode(...)` or `data.aws_iam_policy_document`. Leave empty to skip. | `string` | `""` | no |
+| <a name="input_bucket_region"></a> [bucket\_region](#input\_bucket\_region) | (*Optional*) The AWS region to create the CUR S3 bucket in, for the 'management' account type. Only the bucket is placed there: the provider must still be configured for 'us-east-1'. Changing the value replaces the bucket and the Billing Data Export. Default is the provider's region. | `string` | `null` | no |
 | <a name="input_cloudtrail_enabled"></a> [cloudtrail\_enabled](#input\_cloudtrail\_enabled) | (*Optional*) Whether to enable CloudTrail for the Loader IAM Role. Default is 'false'. | `bool` | `false` | no |
 | <a name="input_configure_ecs_cost_allocation_tags"></a> [configure\_ecs\_cost\_allocation\_tags](#input\_configure\_ecs\_cost\_allocation\_tags) | (*Optional*) Whether to configure the ECS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API. | `bool` | `true` | no |
 | <a name="input_configure_eks_cost_allocation_tags"></a> [configure\_eks\_cost\_allocation\_tags](#input\_configure\_eks\_cost\_allocation\_tags) | (*Optional*) Whether to configure the EKS cost allocation tags. Default is 'true'. Enabling this option requires access to the AWS Cost Explorer API. | `bool` | `true` | no |

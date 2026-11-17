@@ -8,6 +8,7 @@ module "attribute_sensor" {
   account_type    = var.account_type
   organization_id = var.organization_id
   external_id     = random_uuid.external_id.id
+  bucket_region   = var.bucket_region
 
   configure_ecs_cost_allocation_tags = false
   configure_eks_cost_allocation_tags = false

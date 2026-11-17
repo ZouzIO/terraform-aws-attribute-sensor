@@ -20,6 +20,11 @@ variable "account_type" {
   description = "(Required) The AWS Account type. Available options are: 'management' or 'sub'."
 }
 
+variable "bucket_region" {
+  type        = string
+  description = "(*Optional*) The AWS region to create the CUR S3 bucket in. Default is the provider's region."
+  default     = null
+}
 
 variable "general_tags" {
   type        = map(string)

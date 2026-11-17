@@ -1,7 +1,10 @@
 resource "aws_s3_bucket" "this" {
   count = var.account_type == "management" ? 1 : 0
 
+  # The name is built from the provider's region on purpose, whatever the bucket's own
+  # region is: renaming would replace the bucket of every existing deployment
   bucket = "${local.name_prefix}attribute-cur-${local.region}-${data.aws_caller_identity.current.account_id}"
+  region = var.bucket_region
 
   tags = local.s3_bucket_tags
 }
@@ -10,6 +13,7 @@ resource "aws_s3_bucket_ownership_controls" "this" {
   count = var.account_type == "management" ? 1 : 0
 
   bucket = aws_s3_bucket.this[0].id
+  region = var.bucket_region
 
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -29,6 +33,7 @@ resource "aws_s3_bucket_acl" "this" {
   depends_on = [aws_s3_bucket_ownership_controls.this[0]]
 
   bucket = aws_s3_bucket.this[0].id
+  region = var.bucket_region
   acl    = "private"
 }
 
@@ -36,6 +41,7 @@ resource "aws_s3_bucket_policy" "this" {
   count = var.account_type == "management" ? 1 : 0
 
   bucket = aws_s3_bucket.this[0].id
+  region = var.bucket_region
 
   policy = jsonencode({
     Version = "2012-10-17"

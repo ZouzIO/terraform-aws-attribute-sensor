@@ -1,11 +1,10 @@
-# Attribute Sensor Simple Example
+# Attribute Sensor Multiple Accounts Example
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 6.0 |
 
 ## Providers
 
@@ -17,10 +16,10 @@
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_attribute-sensor-mgmt"></a> [attribute-sensor-mgmt](#module\_attribute-sensor-mgmt) | ZouzIO/attribute-sensor/aws | ~> 2.0 |
-| <a name="module_attribute-sensor-sub-1"></a> [attribute-sensor-sub-1](#module\_attribute-sensor-sub-1) | ZouzIO/attribute-sensor/aws | ~> 2.0 |
-| <a name="module_attribute-sub-2"></a> [attribute-sub-2](#module\_attribute-sub-2) | ZouzIO/attribute-sensor/aws | ~> 2.0 |
-| <a name="module_attribute-sub-3"></a> [attribute-sub-3](#module\_attribute-sub-3) | ZouzIO/attribute-sensor/aws | ~> 2.0 |
+| <a name="module_attribute-sensor-mgmt"></a> [attribute-sensor-mgmt](#module\_attribute-sensor-mgmt) | ZouzIO/attribute-sensor/aws | ~> 4.0 |
+| <a name="module_attribute-sensor-sub-1"></a> [attribute-sensor-sub-1](#module\_attribute-sensor-sub-1) | ZouzIO/attribute-sensor/aws | ~> 4.0 |
+| <a name="module_attribute-sub-2"></a> [attribute-sub-2](#module\_attribute-sub-2) | ZouzIO/attribute-sensor/aws | ~> 4.0 |
+| <a name="module_attribute-sub-3"></a> [attribute-sub-3](#module\_attribute-sub-3) | ZouzIO/attribute-sensor/aws | ~> 4.0 |
 
 ## Resources
 

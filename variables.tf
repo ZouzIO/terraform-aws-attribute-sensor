@@ -4,6 +4,12 @@ variable "name_prefix" {
   default     = ""
 }
 
+variable "bucket_region" {
+  type        = string
+  description = "(*Optional*) The AWS region to create the CUR S3 bucket in, for the 'management' account type. Only the bucket is placed there: the provider must still be configured for 'us-east-1'. Changing the value replaces the bucket and the Billing Data Export. Default is the provider's region."
+  default     = null
+}
+
 variable "organization_id" {
   type        = string
   description = "(**Required**) The Organization ID provided by Attribute."

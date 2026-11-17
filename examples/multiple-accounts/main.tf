@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
 provider "aws" {
   region = "us-east-1"
 
@@ -38,7 +29,7 @@ resource "random_uuid" "external_id" {}
 
 module "attribute-sensor-mgmt" {
   source  = "ZouzIO/attribute-sensor/aws"
-  version = "~> 2.0"
+  version = "~> 4.0"
 
   providers = {
     aws = aws.mgmt
@@ -55,7 +46,7 @@ module "attribute-sensor-mgmt" {
 
 module "attribute-sensor-sub-1" {
   source  = "ZouzIO/attribute-sensor/aws"
-  version = "~> 2.0"
+  version = "~> 4.0"
 
   providers = {
     aws = aws.sub-account-1
@@ -72,7 +63,7 @@ module "attribute-sensor-sub-1" {
 
 module "attribute-sub-2" {
   source  = "ZouzIO/attribute-sensor/aws"
-  version = "~> 2.0"
+  version = "~> 4.0"
 
   providers = {
     aws = aws.sub-account-2
@@ -89,7 +80,7 @@ module "attribute-sub-2" {
 
 module "attribute-sub-3" {
   source  = "ZouzIO/attribute-sensor/aws"
-  version = "~> 2.0"
+  version = "~> 4.0"
 
   providers = {
     aws = aws.sub-account-3
